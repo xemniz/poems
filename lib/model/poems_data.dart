@@ -1,14 +1,15 @@
 import 'dart:async';
 
 class Poem {
-  final String fullName;
+  final String author;
+//  final String title;
   final String text;
 
-  const Poem({this.fullName, this.text});
+  const Poem({this.author, this.text});
 }
 
 
-abstract class ContactRepository {
+abstract class PoemsRepository {
   Future<Poem> fetch();
 }
 

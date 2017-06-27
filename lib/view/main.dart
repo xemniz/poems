@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:poems/poems_data.dart';
-import 'package:poems/poems_model.dart';
+import 'package:poems/model/poems_data.dart';
+import 'package:poems/model/poems_model.dart';
 
 void main() {
   runApp(new LimeApp());
@@ -35,11 +35,17 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+      appBar: new AppBar(
+        title: new Text("Random poem"),
+      ),
       body: new PageView.builder(
 
         /// Specify the page controller
         controller: _pageController,
-        onPageChanged: onPageChanged, itemBuilder: (BuildContext context, int index) {return new PoemWidget();},
+        onPageChanged: onPageChanged,
+        itemBuilder: (BuildContext context, int index) {
+          return new PoemWidget();
+        },
       ),
     );
   }
@@ -64,19 +70,20 @@ class _MainPageState extends State<MainPage> {
 
 class PoemWidget extends StatefulWidget {
   PoemWidget({ Key key }) : super(key: key);
-  final poemsRepository = new PoemRepository();
+  final poemsRepository = new EseninPoemsRepository();
 
   @override
   _PoemState createState() => new _PoemState(poemsRepository);
 }
 
 class _PoemState extends State <PoemWidget> {
-  PoemRepository _poemsRepository;
+  EseninPoemsRepository _poemsRepository;
+
   bool _isSearching;
-
   Poem _poem;
+  double _textScale = 1.4;
 
-  _PoemState(PoemRepository poemsRepository) {
+  _PoemState(EseninPoemsRepository poemsRepository) {
     _poemsRepository = poemsRepository;
   }
 
@@ -95,29 +102,46 @@ class _PoemState extends State <PoemWidget> {
 
   @override
   Widget build(BuildContext context) {
-    Widget widget ;
+    Widget widget;
 
-    if(_isSearching) {
-      widget = new Center(
+    if (_isSearching) {
+      widget = provideLoadingItem;
+    } else {
+      widget = providePoemItemWidget(context);
+    }
+
+    return widget;
+  }
+
+  Center get provideLoadingItem =>
+      new Center(
           child: new Padding(
               padding: const EdgeInsets.only(left: 16.0, right: 16.0),
               child: new CircularProgressIndicator()
           )
       );
-    }else {
-      widget = new RichText(
-        text: new TextSpan(
-          style: DefaultTextStyle.of(context).style,
-          children: <TextSpan>[
-            new TextSpan(text: _poem.fullName, style: new TextStyle(fontWeight: FontWeight.bold)),
-            new TextSpan(text: _poem.text),
-          ],
-        ),
-      );
-    }
 
-    return widget;
-  }
+  SingleChildScrollView providePoemItemWidget(BuildContext context) =>
+      (new SingleChildScrollView(
+          padding: new EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+          child: new GestureDetector(
+//              onScaleUpdate: (details) => setTextScale(details.scale),
+              child: new Center(
+                  child: new RichText(
+                    textScaleFactor: _textScale,
+                    text: new TextSpan(
+                      style: DefaultTextStyle
+                          .of(context)
+                          .style,
+                      children: <TextSpan>[
+                        new TextSpan(text: _poem.author,
+                            style: new TextStyle(fontWeight: FontWeight.bold)),
+                        new TextSpan(text: _poem.text),
+                      ],
+                    ),
+                  )
+              ))
+      ));
 
   void onLoadContactsComplete(Poem poem) {
     setState(() {
@@ -128,5 +152,11 @@ class _PoemState extends State <PoemWidget> {
 
   void onLoadContactsError() {
 
+  }
+
+  setTextScale(double scale) {
+    setState(() {
+      _textScale = scale;
+    });
   }
 }
