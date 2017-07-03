@@ -1,11 +1,19 @@
 import 'dart:async';
 
 class Poem {
-  final String author;
-//  final String title;
+  final String title;
   final String text;
+  final String year;
 
-  const Poem({this.author, this.text});
+  const Poem({this.title, this.text, this.year});
+}
+
+class Poet {
+  final String name;
+  final int century;
+  final List<Poem> poems;
+
+  const Poet({this.name, this.century, this.poems});
 }
 
 
