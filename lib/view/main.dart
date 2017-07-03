@@ -70,20 +70,20 @@ class _MainPageState extends State<MainPage> {
 
 class PoemWidget extends StatefulWidget {
   PoemWidget({ Key key }) : super(key: key);
-  final poemsRepository = new EseninPoemsRepository();
+  final poemsRepository = new FireBasePoemsRepository("esenin");
 
   @override
   _PoemState createState() => new _PoemState(poemsRepository);
 }
 
 class _PoemState extends State <PoemWidget> {
-  EseninPoemsRepository _poemsRepository;
+  FireBasePoemsRepository _poemsRepository;
 
   bool _isSearching;
   Poem _poem;
   double _textScale = 1.4;
 
-  _PoemState(EseninPoemsRepository poemsRepository) {
+  _PoemState(FireBasePoemsRepository poemsRepository) {
     _poemsRepository = poemsRepository;
   }
 
