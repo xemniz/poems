@@ -1,38 +1,66 @@
+import 'package:firebase_database/ui/firebase_sorted_list.dart';
 import 'package:flutter/material.dart';
+import 'package:poems/model/poems_data.dart';
 import 'package:poems/view/poem_screen.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class PoemsPager extends StatefulWidget {
+  final String poetKey;
+
+  PoemsPager({String poetKey}) : poetKey = poetKey;
+
   @override
   State<StatefulWidget> createState() {
-    return new _PoemsPagerState();
+    return new PoemsPagerState(poetKey);
   }
 }
 
 
-class _PoemsPagerState extends State<PoemsPager> {
+class PoemsPagerState extends State<PoemsPager> {
+  Poet poet;
+  final String poetKey;
+  PoetPresenter poetPresenter;
 
-  /// This controller can be used to programmatically
-  /// set the current displayed page
+  PoemsPagerState(String poetKey)
+      : poetKey = poetKey {
+    poetPresenter = new PoetPresenter(this, poetKey);
+  }
+
   PageController _pageController;
-
-  _PoemsPagerState();
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text("Random poem"),
-      ),
-      body: new PageView.builder(
+    if (poet == null)
+      return new Scaffold(
+        appBar: new AppBar(
+          title: new Text("Random poem"),
+        ),
+        body: new PageView.builder(
+          controller: _pageController,
+          onPageChanged: onPageChanged,
+          itemBuilder: (BuildContext context, int index) {
+            return new PoemWidget(poem: new Poem(text: "", title: ""),);
+          },
+        ),
+      );
+    else {
+      print("build widget");
+      return new Scaffold(
+        appBar: new AppBar(
+          title: new Text("Random poem"),
+        ),
+        body: new PageView.builder(
+          itemCount: poet.poems.length,
 
-        /// Specify the page controller
-        controller: _pageController,
-        onPageChanged: onPageChanged,
-        itemBuilder: (BuildContext context, int index) {
-          return new PoemWidget();
-        },
-      ),
-    );
+          /// Specify the page controller
+          controller: _pageController,
+          onPageChanged: onPageChanged,
+          itemBuilder: (BuildContext context, int index) {
+            return new PoemWidget(poem: poet.poems[index],);
+          },
+        ),
+      );
+    }
   }
 
 
@@ -44,6 +72,7 @@ class _PoemsPagerState extends State<PoemsPager> {
   void initState() {
     super.initState();
     _pageController = new PageController();
+    poetPresenter.fetchPoems();
   }
 
   @override
@@ -51,4 +80,44 @@ class _PoemsPagerState extends State<PoemsPager> {
     super.dispose();
     _pageController.dispose();
   }
+
+  void show(Poet poet) {
+    setState(() {
+      this.poet = poet;
+      print("poet = poet");
+    });
+  }
+}
+
+class PoetPresenter {
+  final poetKey;
+  PoemsPagerState view;
+
+  FirebaseSortedList list;
+
+  PoetPresenter(PoemsPagerState view, String poetKey)
+      : poetKey=poetKey,
+        view=view;
+
+  void fetchPoems() {
+    var q = FirebaseDatabase.instance
+        .reference()
+        .child("poems/${poetKey}");
+    list = new FirebaseSortedList(
+      query: q,
+      comparator: (a, b) => b.key.compareTo(a.key),
+      onValue: onData,
+      onChildAdded: nothing,
+      onChildChanged: nothing,
+      onChildRemoved: nothing,);
+  }
+
+  void onData(DataSnapshot event) {
+    var map = list.map((s) =>
+    new Poem(title: s.value["title"], text: s.value["text"])).toList();
+    print(map.toString());
+    view.show(new Poet(poems: map));
+  }
+
+  void nothing(int i, DataSnapshot d) {}
 }
