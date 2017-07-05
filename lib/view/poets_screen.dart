@@ -59,7 +59,7 @@ class _PoetsListState extends State<PoetsList> {
           new Flexible(
             child: new FirebaseAnimatedList(
               query: reference,
-              sort: (a, b) => b.key.compareTo(a.key),
+              sort: (a, b) => b.value["name"].compareTo(a.value["name"]),
               reverse: true,
               itemBuilder: (_, DataSnapshot snapshot,
                   Animation<double> animation) {
@@ -71,7 +71,6 @@ class _PoetsListState extends State<PoetsList> {
             ),
           )
         ],
-
       ),
     );
   }
@@ -102,14 +101,14 @@ class _ContactListItem extends StatelessWidget {
             ),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          height: 48.0,
+          height: 56.0,
           child: new Text(
             snapshot.value['name'],
             style: Theme
                 .of(context)
                 .primaryTextTheme
-                .title
-                .copyWith(color: Colors.black54),
+                .headline
+                .copyWith(color: Colors.black87),
           ),
         ),
       );

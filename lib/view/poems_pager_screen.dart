@@ -105,7 +105,7 @@ class PoetPresenter {
         .child("poems/${poetKey}");
     list = new FirebaseSortedList(
       query: q,
-      comparator: (a, b) => b.key.compareTo(a.key),
+      comparator: (a, b) => a.value["title"].compareTo(b.value["title"]),
       onValue: onData,
       onChildAdded: nothing,
       onChildChanged: nothing,
